@@ -49,6 +49,34 @@ fn problem1() {
     println!("{}", num_twos * num_threes);
 }
 
+fn distance(s1: &String, s2: &String) -> u32 {
+    return
+        s1.chars()
+            .zip(s2.chars())
+            .map(|(c1, c2)| if c1 == c2 {0} else {1})
+            .sum();
+}
+
+fn problem2() {
+    let lines = lines_from_file("input.txt");
+
+    // Super clumsy and inefficient (but works...)
+    for s1 in lines.iter() {
+        for s2 in lines.iter() {
+            if distance(&s1, &s2) == 1 {
+                for (c1, c2) in s1.chars().zip(s2.chars()) {
+                    if c1 == c2 {
+                        print!("{}", c1);
+                    }
+                }
+                println!("");
+                return
+            }
+        }
+    }
+}
+
 fn main() {
     problem1();
+    problem2();
 }
