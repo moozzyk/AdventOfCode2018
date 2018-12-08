@@ -16,23 +16,18 @@ where
         .collect()
 }
 
-fn to_coordinate(s: &String) -> (u32, u32) {
+fn to_coordinate(s: &String) -> (i32, i32) {
     let v = s.split(", ").collect::<Vec<&str>>();
-    return (v[0].parse::<u32>().unwrap(), v[1].parse::<u32>().unwrap());
+    return (v[0].parse::<i32>().unwrap(), v[1].parse::<i32>().unwrap());
 }
 
-fn distance(p1: (u32, u32), p2: (u32, u32)) -> u32 {
+fn distance(p1: (i32, i32), p2: (i32, i32)) -> u32 {
     let (p1_x, p1_y) = p1;
     let (p2_x, p2_y) = p2;
-    return ((p1_x as i32 - p2_x as i32).abs() + (p1_y as i32 - p2_y as i32).abs()) as u32;
+    return ((p1_x - p2_x).abs() + (p1_y - p2_y).abs()) as u32;
 }
 
-fn problem1() {
-    let coordinates = lines_from_file("input.txt")
-        .iter()
-        .map(|s| to_coordinate(s))
-        .collect::<Vec<(u32, u32)>>();
-
+fn problem1(coordinates: &Vec<(i32, i32)>) {
     let mut field = [[0; 500]; 500];
     for x in 0..500 {
         for y in 0..500 {
@@ -83,6 +78,29 @@ fn problem1() {
     println!("{}", max_size);
 }
 
+fn problem2(coordinates: &Vec<(i32, i32)>) {
+    let mut result = 0;
+    for x in 0..1000 {
+        for y in 0..1000 {
+            let mut total_dist = 0;
+            for i in 0..coordinates.len() {
+                total_dist += distance((x - 500, y - 500), coordinates[i]);
+            }
+            if total_dist < 10000 {
+                result += 1;
+            }
+        }
+    }
+
+    println!("{}", result);
+}
+
 fn main() {
-    problem1();
+    let coordinates = lines_from_file("input.txt")
+        .iter()
+        .map(|s| to_coordinate(s))
+        .collect::<Vec<(i32, i32)>>();
+
+    problem1(&coordinates);
+    problem2(&coordinates);
 }
