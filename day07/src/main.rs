@@ -16,7 +16,7 @@ where
         .collect()
 }
 
-fn problem1(input: Vec<String>) {
+fn build_graph(input: Vec<String>) -> (HashMap<String, Vec<String>>, HashMap<String, HashSet<String>>){
     let mut graph = HashMap::new();
     let mut incoming_edges = HashMap::new();
 
@@ -35,6 +35,12 @@ fn problem1(input: Vec<String>) {
         }
         incoming_edges.get_mut(&child).unwrap().insert(parent.clone());
     }
+
+    return (graph, incoming_edges);
+}
+
+fn problem1(graph: &HashMap<String, Vec<String>>, incoming_edges_: &HashMap<String, HashSet<String>>) -> String {
+    let mut incoming_edges = incoming_edges_.clone();
 
     let mut candidates = HashSet::new();
     for n in graph.keys() {
@@ -58,10 +64,66 @@ fn problem1(input: Vec<String>) {
         }
     }
 
-    println!("{}", result);
+    return result;
+}
+
+fn problem2(graph: &HashMap<String, Vec<String>>, incoming_edges_: &HashMap<String, HashSet<String>>) -> u32 {
+    let mut incoming_edges = incoming_edges_.clone();
+
+    let mut tasks = HashSet::new();
+    for n in graph.keys() {
+        if !incoming_edges.contains_key(n) {
+            tasks.insert(n);
+        }
+    }
+
+    let min_task_time = 60;
+    let mut time = 0;
+    let mut available_workers = 5;
+    let mut scheduled_tasks: HashMap<u32, Vec<String>> = HashMap::new();
+    loop {
+        match scheduled_tasks.remove(&time) {
+            Some(completed_tasks) => {
+                let num_completed_tasks = &completed_tasks.len();
+                for task in completed_tasks {
+                    if graph.contains_key(&task) {
+                        for next_task in graph[&task].iter() {
+                            incoming_edges.get_mut(next_task).unwrap().remove(&task);
+                            if incoming_edges[next_task].is_empty() {
+                                tasks.insert(next_task);
+                            }
+                        }
+                    }
+                }
+
+                available_workers += num_completed_tasks;
+
+                if scheduled_tasks.is_empty() && tasks.is_empty() {
+                    return time;
+                }
+            }
+            None => {}
+        }
+
+        while available_workers > 0 && !tasks.is_empty() {
+            let task = tasks.iter().min().unwrap().clone();
+            let completion_time = time + min_task_time + (task.as_bytes()[0] as u32 - 64);
+            if !scheduled_tasks.contains_key(&completion_time) {
+                scheduled_tasks.insert(completion_time, Vec::new());
+            }
+            scheduled_tasks.get_mut(&completion_time).unwrap().push(task.to_string());
+            tasks.remove(&task);
+            available_workers -= 1;
+        }
+
+        time = time + 1;
+    }
 }
 
 fn main() {
     let lines = lines_from_file("input.txt");
-    problem1(lines);
+    let (graph, incoming_edges) = build_graph(lines);
+
+    println!("{}", problem1(&graph, &incoming_edges));
+    println!("{}", problem2(&graph, &incoming_edges));
 }
