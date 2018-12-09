@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 // Circular list would likely be much simpler and faster
-fn problem1(num_players: u32, last_marble: u32) -> u32 {
+fn problem(num_players: u32, last_marble: u32) -> u32 {
     let mut score = HashMap::new();
     let mut circle = vec![0];
     let mut current_idx = 0;
@@ -32,5 +32,6 @@ fn problem1(num_players: u32, last_marble: u32) -> u32 {
 }
 
 fn main() {
-    println!("{}", problem1(464, 71730));
+    println!("{}", problem(464, 71730));
+    println!("{}", problem(464, 71730 * 100));
 }
