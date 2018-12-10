@@ -78,6 +78,8 @@ fn problem(coordinates: &Vec<((i32, i32), (i32, i32))>) {
     for message_line in message {
         println!("{:?}", message_line);
     }
+
+    println!("{}", time);
 }
 
 fn main() {
