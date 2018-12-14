@@ -30,6 +30,7 @@ struct Cart {
     col: usize,
     direction: u32,
     turn: u32,
+    crashed: bool,
 }
 
 fn move_up(map: &Vec<Vec<char>>, cart: &mut Cart) {
@@ -105,6 +106,7 @@ fn move_right(map: &Vec<Vec<char>>, cart: &mut Cart) {
 }
 
 fn tick(map: &Vec<Vec<char>>, carts: &mut Vec<Cart>) {
+
     for i in 0..carts.len() {
         match carts[i].direction {
             UP => move_up(&map, &mut carts[i]),
@@ -113,10 +115,17 @@ fn tick(map: &Vec<Vec<char>>, carts: &mut Vec<Cart>) {
             RIGHT => move_right(&map, &mut carts[i]),
             _ => panic!("Invalid direction"),
         }
+
+        for j in 0..carts.len() {
+            if j != i && !carts[j].crashed && carts[i].row == carts[j].row && carts[i].col == carts[j].col {
+                carts[i].crashed = true;
+                carts[j].crashed = true;
+            }
+        }
     }
 }
 
-fn problem_1(map: &mut Vec<Vec<char>>) {
+fn get_cart_list(map: &mut Vec<Vec<char>>) -> Vec<Cart> {
     let mut carts = Vec::new();
 
     for row in 0..map.len() {
@@ -124,40 +133,65 @@ fn problem_1(map: &mut Vec<Vec<char>>) {
             match map[row][col] {
                 '>' => {
                     map[row][col] = '-';
-                    carts.push(Cart{row: row, col: col, direction: RIGHT, turn: TURN_LEFT});
+                    carts.push(Cart{row: row, col: col, direction: RIGHT, turn: TURN_LEFT, crashed: false});
                 },
                 '<' => {
                     map[row][col] = '-';
-                    carts.push(Cart{row: row, col: col, direction: LEFT, turn: TURN_LEFT});
+                    carts.push(Cart{row: row, col: col, direction: LEFT, turn: TURN_LEFT, crashed: false});
                 },
                 '^' => {
                     map[row][col] = '|';
-                    carts.push(Cart{row: row, col: col, direction: UP, turn: TURN_LEFT});
+                    carts.push(Cart{row: row, col: col, direction: UP, turn: TURN_LEFT, crashed: false});
                 },
                 'v' => {
                     map[row][col] = '|';
-                    carts.push(Cart{row: row, col: col, direction: DOWN, turn: TURN_LEFT});
+                    carts.push(Cart{row: row, col: col, direction: DOWN, turn: TURN_LEFT, crashed: false});
                 },
                 _ => ()
             }
         }
     }
 
+    return carts;
+
+}
+
+fn problem_1(mut map: Vec<Vec<char>>) {
+    let mut carts = get_cart_list(&mut map);
     loop {
         carts.sort();
-        for i in 1..carts.len() {
-            if carts[i].row == carts[i - 1].row && carts[i].col == carts[i - 1].col {
-                println!("x: {}, y:{}", carts[i].col, carts[i].row);
-                return;
-            }
+        if carts.iter().any(|c| c.crashed) {
+            break;
         }
-        tick(map, &mut carts);
-        // println!("{:?}", &carts);
+        tick(&map, &mut carts);
+    }
 
+    for c in carts.iter().filter(|c| c.crashed) {
+        println!("{}, {}", c.col, c.row);
+        break;
     }
 }
 
+fn problem_2(mut map: Vec<Vec<char>>) {
+    let mut carts = get_cart_list(&mut map);
+
+    while carts.len() > 1 {
+        carts.sort();
+        tick(&map, &mut carts);
+        let mut i:i32 = (carts.len() - 1) as i32;
+        while i >= 0 {
+            if carts[i as usize].crashed {
+                carts.remove(i as usize);
+            }
+            i -= 1;
+        }
+    }
+
+    println!("{}, {}", carts[0].col, carts[0].row);
+}
+
 fn main() {
-    let mut map = lines_from_file("input.txt");
-    problem_1(&mut map);
+    let map = lines_from_file("input.txt");
+    problem_1(map.clone());
+    problem_2(map.clone());
 }
