@@ -17,17 +17,23 @@ fn generation(plants: &mut Vec<char>, transform: &HashMap<String, char>) {
     }
 }
 
-fn problem_1(initial: &Vec<char>, transform: &HashMap<String, char>) {
+fn grow_plants(initial: &Vec<char>, transform: &HashMap<String, char>, num_generations: usize) -> Vec<char>  {
     let mut plants = vec!['.'; SIZE];
     let middle = plants.len() / 2;
     for i in 0..initial.len() {
         plants[middle + i] = initial[i];
     }
 
-    for _generation in 0..20 {
+    for _generation in 0..num_generations {
         generation(&mut plants, transform);
     }
 
+    return plants;
+}
+
+fn problem_1(initial: &Vec<char>, transform: &HashMap<String, char>) {
+
+    let plants = grow_plants(initial, transform, 20);
     let mut result = 0;
     for i in 0..plants.len() {
         if plants[i] == '#' {
@@ -38,10 +44,25 @@ fn problem_1(initial: &Vec<char>, transform: &HashMap<String, char>) {
     println!("{}", result);
 }
 
+fn problem_2(initial: &Vec<char>, transform: &HashMap<String, char>) {
+
+    let plants = grow_plants(initial, transform, 100);
+    let mut result = 0;
+    for i in 0..plants.len() {
+        if plants[i] == '#' {
+            result += -(SIZE as i64)/2 + i as i64 + 50000000000 - 100;
+        }
+    }
+
+    println!("{}", result);
+}
+
+
 fn main() {
     let transform = create_transform();
     let initial = ".##..#.#..##..##..##...#####.#.....#..#..##.###.#.####......#.......#..###.#.#.##.#.#.###...##.###.#";
     problem_1(&initial.chars().collect(), &transform);
+    problem_2(&initial.chars().collect(), &transform);
 }
 
 fn create_transform() -> HashMap<String, char> {
