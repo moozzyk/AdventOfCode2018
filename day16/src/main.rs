@@ -83,6 +83,31 @@ impl Cpu {
     fn eqrr(&mut self, r1: usize, r2: usize, r_out: usize) {
         self.registers[r_out] = if self.registers[r1] == self.registers[r2] { 1 } else { 0 };
     }
+
+    fn run(&mut self, program: &Vec<Vec<i32>>) {
+        for line in program {
+            // println!("{:?}", line);
+            match line[0] {
+                1 => self.addr(line[1] as usize, line[2] as usize, line[3] as usize),
+                13 => self.addi(line[1] as usize, line[2], line[3] as usize),
+                15 => self.mulr(line[1] as usize, line[2] as usize, line[3] as usize),
+                14 => self.muli(line[1] as usize, line[2], line[3] as usize),
+                0 => self.banr(line[1] as usize, line[2] as usize, line[3] as usize),
+                9 => self.bani(line[1] as usize, line[2], line[3] as usize),
+                8 => self.borr(line[1] as usize, line[2] as usize, line[3] as usize),
+                5 => self.bori(line[1] as usize, line[2], line[3] as usize),
+                3 => self.setr(line[1] as usize, line[3] as usize),
+                7 => self.seti(line[1] as i32, line[3] as usize),
+                6 => self.gtir(line[1] as i32, line[2] as usize, line[3] as usize),
+                12 => self.gtri(line[1] as usize, line[2] as i32, line[3] as usize),
+                4 => self.gtrr(line[1] as usize, line[2] as usize, line[3] as usize),
+                10 => self.eqir(line[1] as i32, line[2] as usize, line[3] as usize),
+                2 => self.eqri(line[1] as usize, line[2] as i32, line[3] as usize),
+                11 => self.eqrr(line[1] as usize, line[2] as usize, line[3] as usize),
+                _ => panic!("Unexpected op-code {}", line[0]),
+            }
+        }
+    }
 }
 
 fn can_be_addr(input: &Vec<i32>, before: &Vec<i32>, after: &Vec<i32>) -> usize {
@@ -209,8 +234,21 @@ fn problem_1() {
     println!("{}", result);
 }
 
+fn problem_2() {
+    let lines = lines_from_file("problem2.txt");
+    let program = lines
+        .iter()
+        .map(|l| l.split_whitespace().map(|s| s.parse().unwrap()).collect())
+        .collect();
+
+    let mut cpu = Cpu{registers: vec![0, 0, 0, 0]};
+    cpu.run(&program);
+    println!("{:?}", cpu);
+}
+
 fn main() {
     problem_1();
+    problem_2();
 }
 
 
