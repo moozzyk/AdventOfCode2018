@@ -24,14 +24,17 @@ struct Creature
     col: usize,
     race: char,
     hits: i32,
+    attack: i32,
 }
 
-fn get_creatures(map: &Vec<Vec<char>>) -> Vec<Creature> {
+fn get_creatures(map: &Vec<Vec<char>>, elf_attack: i32, gnome_attack: i32) -> Vec<Creature> {
     let mut creatures = Vec::new();
     for row in 0..map.len() {
         for col in 0..map[row].len() {
-            if map[row][col] == 'G' || map[row][col] == 'E' {
-                creatures.push(Creature{row: row, col: col, race: map[row][col], hits: 200});
+            if map[row][col] == 'G' {
+                creatures.push(Creature{row: row, col: col, race: map[row][col], hits: 200, attack: gnome_attack});
+            } else if map[row][col] == 'E' {
+                creatures.push(Creature{row: row, col: col, race: map[row][col], hits: 200, attack: elf_attack});
             }
         }
     }
@@ -72,8 +75,10 @@ fn try_attack(map: &mut Vec<Vec<char>>, creatures: &mut Vec<Creature>, attacker_
 
     // println!("{:?} attacks {:?}", creatures[attacker_idx], creatures[candidate_idx]);
 
+
+    let mut damage = 0; { damage = creatures[attacker_idx].attack; }
     let creature = &mut creatures[candidate_idx];
-    creature.hits -= 3;
+    creature.hits -= damage;
     if creature.hits <= 0 {
         map[creature.row][creature.col] = '.';
     }
@@ -233,7 +238,7 @@ fn draw_map(map: &Vec<Vec<char>>) {
 
 fn problem_1(input_path: String) {
     let mut map = lines_from_file(input_path);
-    let mut creatures = get_creatures(&map);
+    let mut creatures = get_creatures(&map, 3, 3);
 
     let mut turn_number = 0;
     while !is_battle_over(&creatures) {
@@ -254,6 +259,43 @@ fn problem_1(input_path: String) {
     println!("hit points: {}, turns: {}, result: {}", hit_points_left, turn_number, turn_number * hit_points_left);
 }
 
+fn problem_2(input_path: &String) {
+    let mut elf_attack = 3;
+    loop {
+        let mut map = lines_from_file(input_path);
+        let mut creatures = get_creatures(&map, elf_attack, 3);
+
+        let mut turn_number = 0;
+        while !is_battle_over(&creatures) {
+            println!("Turn {}", turn_number);
+            if !turn(&mut map, &mut creatures) {
+                turn_number += 1;
+            }
+        }
+
+        draw_map(&map);
+
+        if !creatures.iter().any(|c| c.race == 'E' && c.hits <= 0) {
+            let hit_points_left:i32 =
+                creatures
+                    .iter()
+                    .filter(|c| c.hits > 0)
+                    .map(|c| c.hits)
+                    .sum();
+
+            println!("hit points: {}, turns: {}, result: {}", hit_points_left, turn_number, turn_number * hit_points_left);
+            return;
+        }
+
+        println!(":(");
+
+
+        elf_attack += 1;
+    }
+}
+
+
 fn main() {
-    problem_1("input.txt".to_string())
+    problem_1("input.txt".to_string());
+    problem_2(&"input.txt".to_string());
 }
