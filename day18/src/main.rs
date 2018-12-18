@@ -81,7 +81,7 @@ fn get_resource_value(map: &Vec<Vec<char>>) -> u32 {
 fn problem1() {
     let mut map = lines_from_file("input.txt");
     // print_map(&map);
-    for i in 0..10 {
+    for _i in 0..10 {
         minute(&mut map);
         // println!();
         // print_map(&map);
@@ -90,6 +90,29 @@ fn problem1() {
     println!("{}", get_resource_value(&map));
 }
 
+fn problem2() {
+    let mut map = lines_from_file("input.txt");
+    let mut values = vec![];
+
+    for _i in 0..1000 {
+        minute(&mut map);
+        let resource_value = get_resource_value(&map);
+        values.push(resource_value);
+        // println!("{}", resource_value);
+    }
+
+    let mut cycle = 0;
+    for i in (0..values.len() - 2).rev() {
+        if values[i] == *values.last().unwrap() {
+            cycle = values.len() - 1 - i;
+            break;
+        }
+    }
+
+    println!("{}", values[1000 - 1 - cycle  + (1000000000 - 1000) % cycle]);
+}
+
 fn main() {
     problem1();
+    problem2();
 }
