@@ -144,6 +144,19 @@ fn problem_1() {
     cpu.run(&program);
 }
 
+fn problem_2() {
+    const N:i64 = 10551288; // stored in r3
+    let mut res:i64 = 0;
+    for i in 1..=N {
+        if N % i == 0 {
+            res += i;
+        }
+    }
+
+    println!("{}", res);
+}
+
 fn main() {
     problem_1();
+    problem_2();
 }
