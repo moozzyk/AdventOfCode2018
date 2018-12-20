@@ -90,8 +90,9 @@ fn fill_walls(map: &mut Vec<[char; SIZE]>) {
     }
 }
 
-fn bfs(start_pos: (usize, usize), map: &mut Vec<[char; SIZE]>) -> usize {
+fn bfs(start_pos: (usize, usize), map: &mut Vec<[char; SIZE]>) -> (usize, usize) {
     let mut max_steps = 0;
+    let mut dist_1000 = 0;
     let mut q = VecDeque::new();
     q.push_back(((start_pos), 0));
 
@@ -104,16 +105,19 @@ fn bfs(start_pos: (usize, usize), map: &mut Vec<[char; SIZE]>) -> usize {
         map[row][col] = 'x';
 
         max_steps = std::cmp::max(max_steps, steps);
+        if steps >= 1000 {
+            dist_1000 += 1;
+        }
         if map[row + 1][col] == ' ' { q.push_back(((row + 2, col), steps + 1)); }
         if map[row - 1][col] == ' ' { q.push_back(((row - 2, col), steps + 1)); }
         if map[row][col + 1] == ' ' { q.push_back(((row, col + 2), steps + 1)); }
         if map[row][col - 1] == ' ' { q.push_back(((row, col - 2), steps + 1)); }
     }
 
-    return max_steps;
+    return (max_steps, dist_1000);
 }
 
-fn problem_1() {
+fn problem_1_2() {
     let mut input = read_first_line("input.txt");
     input.pop();
     let mut map = create_map();
@@ -121,10 +125,10 @@ fn problem_1() {
     map[start_pos.0][start_pos.1] = ' ';
     build_graph((SIZE / 2 - 1, SIZE / 2), &mut map, &input.chars().collect(), 0);
     fill_walls(&mut map);
-    let max_steps = bfs(start_pos, &mut map);
-    println!("{}", max_steps);
+    let (max_steps, dist_1000) = bfs(start_pos, &mut map);
+    println!("Steps: {}, Num rooms: {}", max_steps, dist_1000);
 }
 
 fn main() {
-    problem_1();
+    problem_1_2();
 }
