@@ -2,6 +2,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
 use std::path::Path;
+use std::collections::HashSet;
 
 fn lines_from_file<P>(filename: P) -> Vec<String>
 where
@@ -87,13 +88,22 @@ impl Cpu {
     }
 
     fn run(&mut self, program: &Vec<(&str, i64, i64, i64)>) {
+        let mut r5_seen = HashSet::new();
+
         loop {
             if self.ip < 0 || self.ip >= program.len() as i64 {
                 break;
             }
 
             if self.ip == 28 {
-                break;
+                println!("Registers: {:?}", self.registers);
+                let r5 = self.registers[5];
+                if r5_seen.contains(&r5) {
+                    println!("repeated. exiting");
+                    break;
+                } else {
+                    r5_seen.insert(r5);
+                }
             }
 
             self.registers[self.ip_reg] = self.ip as i64;
@@ -125,7 +135,7 @@ impl Cpu {
     }
 }
 
-fn problem_1() {
+fn problem_1_2() {
     let lines = lines_from_file("input.txt");
     let source: Vec<Vec<&str>> =
         lines
@@ -145,5 +155,5 @@ fn problem_1() {
 }
 
 fn main() {
-    problem_1();
+    problem_1_2();
 }
