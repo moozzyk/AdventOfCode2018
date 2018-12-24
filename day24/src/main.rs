@@ -50,18 +50,18 @@ impl PartialEq for Group {
     }
 }
 
-fn get_immune_system_army() -> Vec<Group> {
+fn get_immune_system_army(boost: i32) -> Vec<Group> {
     vec![
-        Group{id: 1, units: 2086, hit_points: 11953, damage: 46, attack_type: AttackType::Cold, initiative: 13, immune_to: vec![], weak_to: vec![]},
-        Group{id: 1, units: 329, hit_points: 3402, damage: 90, attack_type: AttackType::Slashing, initiative: 1, immune_to: vec![], weak_to: vec![AttackType::Bludgeoning]},
-        Group{id: 1, units: 414, hit_points: 7103 , damage: 170, attack_type: AttackType::Radiation, initiative: 4, immune_to: vec![AttackType::Radiation], weak_to: vec![AttackType::Bludgeoning]},
-        Group{id: 1, units: 2205, hit_points: 7118, damage: 26, attack_type: AttackType::Radiation, initiative: 18, immune_to: vec![AttackType::Cold], weak_to: vec![AttackType::Fire]},
-        Group{id: 1, units: 234, hit_points: 9284, damage: 287, attack_type: AttackType::Radiation, initiative: 12, immune_to: vec![AttackType::Cold, AttackType::Fire], weak_to: vec![AttackType::Slashing]},
-        Group{id: 1, units: 6460, hit_points: 10804, damage: 15, attack_type: AttackType::Slashing, initiative: 11, immune_to: vec![], weak_to: vec![AttackType::Fire]},
-        Group{id: 1, units: 79, hit_points: 1935, damage: 244, attack_type: AttackType::Radiation, initiative: 8, immune_to: vec![], weak_to: vec![]},
-        Group{id: 1, units: 919, hit_points: 2403, damage: 22, attack_type: AttackType::Slashing, initiative: 2, immune_to: vec![], weak_to: vec![AttackType::Fire]},
-        Group{id: 1, units: 172, hit_points: 1439, damage: 69, attack_type: AttackType::Slashing, initiative: 3, immune_to: vec![AttackType::Cold, AttackType::Fire], weak_to: vec![AttackType::Slashing]},
-        Group{id: 1, units: 1721, hit_points: 2792, damage: 13, attack_type: AttackType::Cold, initiative: 16, immune_to: vec![], weak_to: vec![AttackType::Radiation, AttackType::Fire]},
+        Group{id: 1, units: 2086, hit_points: 11953, damage: 46 + boost, attack_type: AttackType::Cold, initiative: 13, immune_to: vec![], weak_to: vec![]},
+        Group{id: 1, units: 329, hit_points: 3402, damage: 90 + boost, attack_type: AttackType::Slashing, initiative: 1, immune_to: vec![], weak_to: vec![AttackType::Bludgeoning]},
+        Group{id: 1, units: 414, hit_points: 7103 , damage: 170 + boost, attack_type: AttackType::Radiation, initiative: 4, immune_to: vec![AttackType::Radiation], weak_to: vec![AttackType::Bludgeoning]},
+        Group{id: 1, units: 2205, hit_points: 7118, damage: 26 + boost, attack_type: AttackType::Radiation, initiative: 18, immune_to: vec![AttackType::Cold], weak_to: vec![AttackType::Fire]},
+        Group{id: 1, units: 234, hit_points: 9284, damage: 287 + boost, attack_type: AttackType::Radiation, initiative: 12, immune_to: vec![AttackType::Cold, AttackType::Fire], weak_to: vec![AttackType::Slashing]},
+        Group{id: 1, units: 6460, hit_points: 10804, damage: 15 + boost, attack_type: AttackType::Slashing, initiative: 11, immune_to: vec![], weak_to: vec![AttackType::Fire]},
+        Group{id: 1, units: 79, hit_points: 1935, damage: 244 + boost, attack_type: AttackType::Radiation, initiative: 8, immune_to: vec![], weak_to: vec![]},
+        Group{id: 1, units: 919, hit_points: 2403, damage: 22 + boost, attack_type: AttackType::Slashing, initiative: 2, immune_to: vec![], weak_to: vec![AttackType::Fire]},
+        Group{id: 1, units: 172, hit_points: 1439, damage: 69 + boost, attack_type: AttackType::Slashing, initiative: 3, immune_to: vec![AttackType::Cold, AttackType::Fire], weak_to: vec![AttackType::Slashing]},
+        Group{id: 1, units: 1721, hit_points: 2792, damage: 13 + boost, attack_type: AttackType::Cold, initiative: 16, immune_to: vec![], weak_to: vec![AttackType::Radiation, AttackType::Fire]},
     ]
 }
 
@@ -158,8 +158,8 @@ fn max_initiative(army: &Vec<Group>) -> u32 {
     return army.iter().map(|g| g.initiative).max().unwrap();
 }
 
-fn problem_1() {
-    let mut immune_system_army = get_immune_system_army();
+fn fight(boost: i32) -> (i32, i32) {
+    let mut immune_system_army = get_immune_system_army(boost);
     let mut infection_army = get_infection_army();
 
     let max_initiative = std::cmp::max(max_initiative(&immune_system_army), max_initiative(&infection_army));
@@ -188,9 +188,21 @@ fn problem_1() {
         }
     }
 
-    println!("{}", num_active_units(&immune_system_army) + num_active_units(&infection_army));
+    return (num_active_units(&immune_system_army), num_active_units(&infection_army));
+}
+
+fn problem_1() {
+    let (immune_system_active_units, infection_army_active_units) = fight(0);
+    println!("{}", immune_system_active_units + infection_army_active_units);
+}
+
+fn problem_2() {
+    // 38 - manual binary search (note that no one wins for 37 and 36)
+    let (immune_system_active_units, infection_army_active_units) = fight(38);
+    println!("immune system army active units: {}, infection army active units: {}", immune_system_active_units, infection_army_active_units);
 }
 
 fn main() {
     problem_1();
+    problem_2();
 }
