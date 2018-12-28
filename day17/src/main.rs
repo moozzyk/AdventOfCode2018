@@ -86,14 +86,14 @@ fn has_walls(start_from: (usize, usize), geo_map: &Vec<[char; SIZE]>) -> bool {
     return has_wall(start_from, |col| col - 1, geo_map) && has_wall(start_from, |col| col + 1, geo_map);
 }
 
-fn fill_layer(start_from: (usize, usize), next: fn(usize) -> usize, geo_map: &mut Vec<[char; SIZE]>, sources: &mut VecDeque<(usize, usize)>, visited: &mut HashSet<(usize, usize)>) -> bool {
+fn fill_layer(start_from: (usize, usize), c: char, next: fn(usize) -> usize, geo_map: &mut Vec<[char; SIZE]>, sources: &mut VecDeque<(usize, usize)>, visited: &mut HashSet<(usize, usize)>) -> bool {
     let (row, mut col) = start_from;
     loop {
         if geo_map[row][col] == '#' {
             return false;
         }
 
-        geo_map[row][col] = '%';
+        geo_map[row][col] = c;
 
         if geo_map[row + 1][col] == '#' && geo_map[row + 1][col - 1] != '#' && geo_map[row + 1][col + 1] != '#' {
             add_to_sources((row, next(col)), sources, visited);
@@ -120,9 +120,11 @@ fn fill_from_bottom(start_from: (usize, usize), geo_map: &mut Vec<[char; SIZE]>,
     let (mut row, col) = start_from;
 
     loop {
-        let left_full = fill_layer((row, col), |col| col - 1, geo_map, sources, visited);
-        let right_full = fill_layer((row, col), |col| col + 1, geo_map, sources, visited);
+        let left_full = fill_layer((row, col), '%', |col| col - 1, geo_map, sources, visited);
+        let right_full = fill_layer((row, col), '%',  |col| col + 1, geo_map, sources, visited);
         if left_full || right_full {
+            fill_layer((row, col), '|', |col| col - 1, geo_map, sources, visited);
+            fill_layer((row, col), '|',  |col| col + 1, geo_map, sources, visited);
             break;
         }
         row -= 1;
@@ -156,7 +158,12 @@ fn pour(geo_map: &mut Vec<[char; SIZE]>, sources: &mut VecDeque<(usize, usize)>,
             return;
         }
 
-        geo_map[row][col] = '%';
+        if geo_map[row][col - 1] == '%' || geo_map[row][col + 1] == '%' {
+            geo_map[row][col] = '%';
+        } else {
+            geo_map[row][col] = '|';
+        }
+
         if geo_map[row + 1][col] == '#' {
             break;
         }
@@ -192,9 +199,7 @@ fn get_min_max_row(geo_map: &Vec<[char; SIZE]>) -> (usize, usize) {
     return (min_row, max_row);
 }
 
-fn problem_1(geo_map: &mut Vec<[char; SIZE]>) {
-    let (min_row, max_row) = get_min_max_row(geo_map);
-
+fn fill(geo_map: &mut Vec<[char; SIZE]>) {
     let mut visited = HashSet::new();
     let mut sources = VecDeque::new();
     add_to_sources((0, 500), &mut sources, &mut visited);
@@ -202,21 +207,39 @@ fn problem_1(geo_map: &mut Vec<[char; SIZE]>) {
     while !sources.is_empty() {
         pour(geo_map, &mut sources, &mut visited);
     }
+}
 
+fn count_water(geo_map: &Vec<[char; SIZE]>, min_row: usize, max_row: usize, chars: &Vec<char>) -> usize {
     let mut num_water = 0;
     for row in min_row..=max_row {
         for col in 0..SIZE {
-            if geo_map[row][col] == '%' {
-                num_water += 1;
+            for c in chars {
+                if geo_map[row][col] == *c {
+                    num_water += 1;
+                }
             }
         }
     }
 
-    println!("{}", num_water);
+    return num_water;
+}
+
+fn problem_1(geo_map: &Vec<[char; SIZE]>, min_row: usize, max_row: usize) -> usize {
+    return count_water(geo_map, min_row, max_row, &vec!['%', '|']);
+}
+
+fn problem_2(geo_map: &Vec<[char; SIZE]>, min_row: usize, max_row: usize) -> usize {
+    return count_water(geo_map, min_row, max_row, &vec!['%']);
 }
 
 fn main() {
     let input = lines_from_file("input.txt");
+
     let mut geo_map = create_map(&input);
-    problem_1(&mut geo_map);
+    let (min_row, max_row) = get_min_max_row(&geo_map);
+
+    fill(&mut geo_map);
+
+    println!("{}", problem_1(&mut geo_map, min_row, max_row));
+    println!("{}", problem_2(&mut geo_map, min_row, max_row));
 }
